@@ -246,6 +246,7 @@ enum
   SIGNAL_NEW_PAYLOADER,
   SIGNAL_REQUEST_RTCP_KEY,
   SIGNAL_ACCEPT_CERTIFICATE,
+  SIGNAL_UPDATE_SDP,
   LAST_SIGNAL
 };
 
@@ -303,6 +304,7 @@ gst_rtsp_client_sink_ntp_time_source_get_type (void)
 #define DEFAULT_USER_AGENT       "GStreamer/" PACKAGE_VERSION
 #define DEFAULT_PROFILES         GST_RTSP_PROFILE_AVP
 #define DEFAULT_RTX_TIME_MS      500
+#define DEFAULT_PUBLISH_CLOCK_MODE GST_RTSP_PUBLISH_CLOCK_MODE_CLOCK
 
 enum
 {
@@ -332,7 +334,8 @@ enum
   PROP_TLS_INTERACTION,
   PROP_NTP_TIME_SOURCE,
   PROP_USER_AGENT,
-  PROP_PROFILES
+  PROP_PROFILES,
+  PROP_PUBLISH_CLOCK_MODE,
 };
 
 static void gst_rtsp_client_sink_finalize (GObject * object);
@@ -660,9 +663,19 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
           GST_TYPE_STRUCTURE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
-   * GstRTSPClientSink::tls-validation-flags:
+   * GstRTSPClientSink:tls-validation-flags:
    *
    * TLS certificate validation flags used to validate server
+   * certificate.
+   *
+   * GLib guarantees that if certificate verification fails, at least one
+   * error will be set, but it does not guarantee that all possible errors
+   * will be set. Accordingly, you may not safely decide to ignore any
+   * particular type of error.
+   *
+   * For example, it would be incorrect to mask %G_TLS_CERTIFICATE_EXPIRED if
+   * you want to allow expired certificates, because this could potentially be
+   * the only error flag set even if other problems exist with the
    * certificate.
    *
    */
@@ -673,7 +686,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
-   * GstRTSPClientSink::tls-database:
+   * GstRTSPClientSink:tls-database:
    *
    * TLS database with anchor certificate authorities used to validate
    * the server certificate.
@@ -685,7 +698,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
           G_TYPE_TLS_DATABASE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
-   * GstRTSPClientSink::tls-interaction:
+   * GstRTSPClientSink:tls-interaction:
    *
    * A #GTlsInteraction object to be used when the connection or certificate
    * database need to interact with the user. This will be used to prompt the
@@ -698,7 +711,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
           G_TYPE_TLS_INTERACTION, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
-   * GstRTSPClientSink::ntp-time-source:
+   * GstRTSPClientSink:ntp-time-source:
    *
    * allows to select the time source that should be used
    * for the NTP time in outgoing packets
@@ -711,7 +724,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
-   * GstRTSPClientSink::user-agent:
+   * GstRTSPClientSink:user-agent:
    *
    * The string to set in the User-Agent header.
    *
@@ -720,6 +733,20 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
       g_param_spec_string ("user-agent", "User Agent",
           "The User-Agent string to send to the server",
           DEFAULT_USER_AGENT, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+
+  /**
+   * GstRTSPClientSink:publish-clock-mode:
+   *
+   * Sets if and how the media clock should be published according to RFC7273.
+   *
+   * Since: 1.22
+   *
+   */
+  g_object_class_install_property (gobject_class, PROP_PUBLISH_CLOCK_MODE,
+      g_param_spec_enum ("publish-clock-mode", "Publish Clock Mode",
+          "Clock publishing mode according to RFC7273",
+          GST_TYPE_RTSP_PUBLISH_CLOCK_MODE, DEFAULT_PUBLISH_CLOCK_MODE,
+          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 
   /**
    * GstRTSPClientSink::handle-request:
@@ -738,7 +765,9 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
    */
   gst_rtsp_client_sink_signals[SIGNAL_HANDLE_REQUEST] =
       g_signal_new ("handle-request", G_TYPE_FROM_CLASS (klass), 0,
-      0, NULL, NULL, NULL, G_TYPE_NONE, 2, G_TYPE_POINTER, G_TYPE_POINTER);
+      0, NULL, NULL, NULL, G_TYPE_NONE, 2,
+      GST_TYPE_RTSP_MESSAGE | G_SIGNAL_TYPE_STATIC_SCOPE,
+      GST_TYPE_RTSP_MESSAGE | G_SIGNAL_TYPE_STATIC_SCOPE);
 
   /**
    * GstRTSPClientSink::new-manager:
@@ -751,7 +780,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
    */
   gst_rtsp_client_sink_signals[SIGNAL_NEW_MANAGER] =
       g_signal_new_class_handler ("new-manager", G_TYPE_FROM_CLASS (klass),
-      G_SIGNAL_RUN_FIRST | G_SIGNAL_RUN_CLEANUP, 0, NULL, NULL, NULL,
+      G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
       G_TYPE_NONE, 1, GST_TYPE_ELEMENT);
 
   /**
@@ -765,7 +794,7 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
    */
   gst_rtsp_client_sink_signals[SIGNAL_NEW_PAYLOADER] =
       g_signal_new_class_handler ("new-payloader", G_TYPE_FROM_CLASS (klass),
-      G_SIGNAL_RUN_FIRST | G_SIGNAL_RUN_CLEANUP, 0, NULL, NULL, NULL,
+      G_SIGNAL_RUN_FIRST, 0, NULL, NULL, NULL,
       G_TYPE_NONE, 1, GST_TYPE_ELEMENT);
 
   /**
@@ -802,6 +831,22 @@ gst_rtsp_client_sink_class_init (GstRTSPClientSinkClass * klass)
       G_SIGNAL_RUN_LAST, 0, g_signal_accumulator_true_handled, NULL, NULL,
       G_TYPE_BOOLEAN, 3, G_TYPE_TLS_CONNECTION, G_TYPE_TLS_CERTIFICATE,
       G_TYPE_TLS_CERTIFICATE_FLAGS);
+
+  /**
+   * GstRTSPClientSink::update-sdp:
+   * @rtsp_client_sink: a #GstRTSPClientSink
+   * @sdp: a #GstSDPMessage
+   *
+   * Emitted right before the ANNOUNCE request is sent to the server with the
+   * generated SDP. The SDP can be updated from signal handlers but the order
+   * and number of medias must not be changed.
+   *
+   * Since: 1.20
+   */
+  gst_rtsp_client_sink_signals[SIGNAL_UPDATE_SDP] =
+      g_signal_new_class_handler ("update-sdp", G_TYPE_FROM_CLASS (klass),
+      0, 0, NULL, NULL, NULL,
+      G_TYPE_NONE, 1, GST_TYPE_SDP_MESSAGE | G_SIGNAL_TYPE_STATIC_SCOPE);
 
   gstelement_class->provide_clock = gst_rtsp_client_sink_provide_clock;
   gstelement_class->change_state = gst_rtsp_client_sink_change_state;
@@ -851,6 +896,7 @@ gst_rtsp_client_sink_init (GstRTSPClientSink * sink)
   sink->tls_interaction = DEFAULT_TLS_INTERACTION;
   sink->ntp_time_source = DEFAULT_NTP_TIME_SOURCE;
   sink->user_agent = g_strdup (DEFAULT_USER_AGENT);
+  sink->publish_clock_mode = DEFAULT_PUBLISH_CLOCK_MODE;
 
   sink->profiles = DEFAULT_PROFILES;
 
@@ -1173,6 +1219,7 @@ gst_rtsp_client_sink_create_stream (GstRTSPClientSink * sink,
 
   gst_rtsp_stream_set_ulpfec_pt (stream, ulpfec_pt);
   gst_rtsp_stream_set_ulpfec_percentage (stream, context->ulpfec_percentage);
+  gst_rtsp_stream_set_publish_clock_mode (stream, sink->publish_clock_mode);
 
 #if 0
   if (priv->pool)
@@ -1673,6 +1720,9 @@ gst_rtsp_client_sink_set_property (GObject * object, guint prop_id,
       g_free (rtsp_client_sink->user_agent);
       rtsp_client_sink->user_agent = g_value_dup_string (value);
       break;
+    case PROP_PUBLISH_CLOCK_MODE:
+      rtsp_client_sink->publish_clock_mode = g_value_get_enum (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -1786,6 +1836,9 @@ gst_rtsp_client_sink_get_property (GObject * object, guint prop_id,
       break;
     case PROP_USER_AGENT:
       g_value_set_string (value, rtsp_client_sink->user_agent);
+      break;
+    case PROP_PUBLISH_CLOCK_MODE:
+      g_value_set_enum (value, rtsp_client_sink->publish_clock_mode);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -3583,12 +3636,25 @@ request_fec_encoder (GstElement * rtpbin, guint sessid,
 }
 
 static gboolean
+gst_rtsp_client_sink_is_stopping (GstRTSPClientSink * sink)
+{
+  gboolean is_stopping;
+
+  GST_OBJECT_LOCK (sink);
+  is_stopping = sink->task == NULL;
+  GST_OBJECT_UNLOCK (sink);
+
+  return is_stopping;
+}
+
+static gboolean
 gst_rtsp_client_sink_collect_streams (GstRTSPClientSink * sink)
 {
   GstRTSPStreamContext *context;
   GList *walk;
   const gchar *base;
-  gboolean has_slash;
+  gchar *stream_path;
+  GstUri *base_uri, *uri;
 
   GST_DEBUG_OBJECT (sink, "Collecting stream information");
 
@@ -3596,8 +3662,13 @@ gst_rtsp_client_sink_collect_streams (GstRTSPClientSink * sink)
     return FALSE;
 
   base = get_aggregate_control (sink);
-  /* check if the base ends with / */
-  has_slash = g_str_has_suffix (base, "/");
+
+  base_uri = gst_uri_from_string (base);
+  if (!base_uri) {
+    GST_ELEMENT_ERROR (sink, RESOURCE, NOT_FOUND, (NULL),
+        ("Could not parse uri %s", base));
+    return FALSE;
+  }
 
   g_mutex_lock (&sink->preroll_lock);
   while (sink->contexts == NULL && !sink->conninfo.flushing) {
@@ -3615,7 +3686,8 @@ gst_rtsp_client_sink_collect_streams (GstRTSPClientSink * sink)
       continue;
 
     g_mutex_lock (&sink->preroll_lock);
-    while (!context->prerolled && !sink->conninfo.flushing) {
+    while (!context->prerolled && !sink->conninfo.flushing
+        && !gst_rtsp_client_sink_is_stopping (sink)) {
       GST_DEBUG_OBJECT (sink, "Waiting for caps on stream %d", context->index);
       g_cond_wait (&sink->preroll_cond, &sink->preroll_lock);
     }
@@ -3636,11 +3708,16 @@ gst_rtsp_client_sink_collect_streams (GstRTSPClientSink * sink)
         gst_rtsp_client_sink_create_stream (sink, context, context->payloader,
         srcpad);
 
-    /* concatenate the two strings, insert / when not present */
+    /* append stream index to uri path */
     g_free (context->conninfo.location);
-    context->conninfo.location =
-        g_strdup_printf ("%s%sstream=%d", base, has_slash ? "" : "/",
-        context->index);
+
+    stream_path = g_strdup_printf ("stream=%d", context->index);
+    uri = gst_uri_copy (base_uri);
+    gst_uri_append_path (uri, stream_path);
+
+    context->conninfo.location = gst_uri_to_string (uri);
+    gst_uri_unref (uri);
+    g_free (stream_path);
 
     if (sink->rtx_time > 0) {
       /* enable retransmission by setting rtprtxsend as the "aux" element of rtpbin */
@@ -3677,10 +3754,12 @@ gst_rtsp_client_sink_collect_streams (GstRTSPClientSink * sink)
   sink->streams_collected = TRUE;
   g_mutex_unlock (&sink->preroll_lock);
 
+  gst_uri_unref (base_uri);
   return TRUE;
 
 join_bin_failed:
 
+  gst_uri_unref (base_uri);
   GST_ELEMENT_ERROR (sink, RESOURCE, READ, (NULL),
       ("Could not start stream %d", context->index));
   return FALSE;
@@ -4342,18 +4421,6 @@ done:
   return res;
 }
 
-static gboolean
-gst_rtsp_client_sink_is_stopping (GstRTSPClientSink * sink)
-{
-  gboolean is_stopping;
-
-  GST_OBJECT_LOCK (sink);
-  is_stopping = sink->task == NULL;
-  GST_OBJECT_UNLOCK (sink);
-
-  return is_stopping;
-}
-
 static GstRTSPResult
 gst_rtsp_client_sink_record (GstRTSPClientSink * sink, gboolean async)
 {
@@ -4463,6 +4530,8 @@ gst_rtsp_client_sink_record (GstRTSPClientSink * sink, gboolean async)
   if (res < 0)
     goto create_request_failed;
 
+  g_signal_emit (sink, gst_rtsp_client_sink_signals[SIGNAL_UPDATE_SDP], 0, sdp);
+
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CONTENT_TYPE,
       "application/sdp");
 
@@ -4546,6 +4615,11 @@ gst_rtsp_client_sink_record (GstRTSPClientSink * sink, gboolean async)
 
   gst_rtsp_client_sink_set_state (sink, GST_STATE_PLAYING);
   sink->state = GST_RTSP_STATE_PLAYING;
+  for (walk = sink->contexts; walk; walk = g_list_next (walk)) {
+    GstRTSPStreamContext *context = (GstRTSPStreamContext *) walk->data;
+
+    gst_rtsp_stream_unblock_rtcp (context->stream);
+  }
 
   /* clean up any messages */
   gst_rtsp_message_unset (&request);
@@ -4949,6 +5023,10 @@ gst_rtsp_client_sink_stop (GstRTSPClientSink * sink)
     g_mutex_lock (&sink->block_streams_lock);
     g_cond_broadcast (&sink->block_streams_cond);
     g_mutex_unlock (&sink->block_streams_lock);
+
+    g_mutex_lock (&sink->preroll_lock);
+    g_cond_broadcast (&sink->preroll_cond);
+    g_mutex_unlock (&sink->preroll_lock);
 
     /* make sure it is not running */
     GST_RTSP_STREAM_LOCK (sink);

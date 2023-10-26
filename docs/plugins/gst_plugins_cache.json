@@ -174,6 +174,18 @@
                         "type": "gchararray",
                         "writable": true
                     },
+                    "publish-clock-mode": {
+                        "blurb": "Clock publishing mode according to RFC7273",
+                        "conditionally-available": false,
+                        "construct": false,
+                        "construct-only": false,
+                        "controllable": false,
+                        "default": "clock (1)",
+                        "mutable": "null",
+                        "readable": true,
+                        "type": "GstRTSPPublishClockMode",
+                        "writable": true
+                    },
                     "retry": {
                         "blurb": "Max number of retries when allocating RTP ports.",
                         "conditionally-available": false,
@@ -321,7 +333,7 @@
                         "construct": false,
                         "construct-only": false,
                         "controllable": false,
-                        "default": "GStreamer/1.18.5",
+                        "default": "GStreamer/1.22.6",
                         "mutable": "null",
                         "readable": true,
                         "type": "gchararray",
@@ -376,11 +388,11 @@
                         "args": [
                             {
                                 "name": "arg0",
-                                "type": "gpointer"
+                                "type": "GstRTSPMessage"
                             },
                             {
                                 "name": "arg1",
-                                "type": "gpointer"
+                                "type": "GstRTSPMessage"
                             }
                         ],
                         "return-type": "void"
@@ -414,6 +426,15 @@
                         ],
                         "return-type": "GstCaps",
                         "when": "last"
+                    },
+                    "update-sdp": {
+                        "args": [
+                            {
+                                "name": "arg0",
+                                "type": "GstSDPMessage"
+                            }
+                        ],
+                        "return-type": "void"
                     }
                 }
             }

@@ -206,7 +206,8 @@ create_connection (GstRTSPConnection ** conn)
 }
 
 static GstRTSPClient *
-setup_client (const gchar * launch_line)
+setup_client (const gchar * launch_line, const gchar * mount_point,
+    gboolean enable_rtcp)
 {
   GstRTSPClient *client;
   GstRTSPSessionPool *session_pool;
@@ -227,7 +228,9 @@ setup_client (const gchar * launch_line)
   else
     gst_rtsp_media_factory_set_launch (factory, launch_line);
 
-  gst_rtsp_mount_points_add_factory (mount_points, "/test", factory);
+  gst_rtsp_media_factory_set_enable_rtcp (factory, enable_rtcp);
+
+  gst_rtsp_mount_points_add_factory (mount_points, mount_point, factory);
   gst_rtsp_client_set_mount_points (client, mount_points);
 
   thread_pool = gst_rtsp_thread_pool_new ();
@@ -492,7 +495,8 @@ GST_START_TEST (test_options)
 
 GST_END_TEST;
 
-GST_START_TEST (test_describe)
+static void
+test_describe_sub (const gchar * mount_point, const gchar * url)
 {
   GstRTSPClient *client;
   GstRTSPMessage request = { 0, };
@@ -502,7 +506,7 @@ GST_START_TEST (test_describe)
 
   /* simple DESCRIBE for non-existing url */
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_DESCRIBE,
-          "rtsp://localhost/test") == GST_RTSP_OK);
+          url) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
   g_free (str);
@@ -515,9 +519,9 @@ GST_START_TEST (test_describe)
   g_object_unref (client);
 
   /* simple DESCRIBE for an existing url */
-  client = setup_client (NULL);
+  client = setup_client (NULL, mount_point, TRUE);
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_DESCRIBE,
-          "rtsp://localhost/test") == GST_RTSP_OK);
+          url) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
   g_free (str);
@@ -528,6 +532,18 @@ GST_START_TEST (test_describe)
   gst_rtsp_message_unset (&request);
 
   teardown_client (client);
+}
+
+GST_START_TEST (test_describe)
+{
+  test_describe_sub ("/test", "rtsp://localhost/test");
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_describe_root_mount_point)
+{
+  test_describe_sub ("/", "rtsp://localhost");
 }
 
 GST_END_TEST;
@@ -661,14 +677,14 @@ test_teardown_response_200 (GstRTSPClient * client,
 }
 
 static void
-send_teardown (GstRTSPClient * client)
+send_teardown (GstRTSPClient * client, const gchar * url)
 {
   GstRTSPMessage request = { 0, };
   gchar *str;
 
   fail_unless (session_id != NULL);
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_TEARDOWN,
-          "rtsp://localhost/test") == GST_RTSP_OK);
+          url) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_take_header (&request, GST_RTSP_HDR_CSEQ, str);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_SESSION, session_id);
@@ -681,19 +697,21 @@ send_teardown (GstRTSPClient * client)
   session_id = NULL;
 }
 
-GST_START_TEST (test_setup_tcp)
+static void
+test_setup_tcp_sub (const gchar * mount_point, const gchar * url1,
+    const gchar * url2)
 {
   GstRTSPClient *client;
   GstRTSPConnection *conn;
   GstRTSPMessage request = { 0, };
   gchar *str;
 
-  client = setup_client (NULL);
+  client = setup_client (NULL, mount_point, TRUE);
   create_connection (&conn);
   fail_unless (gst_rtsp_client_set_connection (client, conn));
 
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
-          "rtsp://localhost/test/stream=0") == GST_RTSP_OK);
+          url1) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
   g_free (str);
@@ -708,26 +726,75 @@ GST_START_TEST (test_setup_tcp)
 
   gst_rtsp_message_unset (&request);
 
-  send_teardown (client);
+  send_teardown (client, url2);
   teardown_client (client);
+}
+
+GST_START_TEST (test_setup_tcp)
+{
+  test_setup_tcp_sub ("/test", "rtsp://localhost/test/stream=0",
+      "rtsp://localhost/test");
 }
 
 GST_END_TEST;
 
-GST_START_TEST (test_setup_tcp_two_streams_same_channels)
+GST_START_TEST (test_setup_tcp_root_mount_point)
+{
+  test_setup_tcp_sub ("/", "rtsp://localhost/stream=0", "rtsp://localhost");
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_setup_no_rtcp)
 {
   GstRTSPClient *client;
   GstRTSPConnection *conn;
   GstRTSPMessage request = { 0, };
   gchar *str;
 
-  client = setup_client (NULL);
+  client = setup_client (NULL, "/test", FALSE);
+  create_connection (&conn);
+  fail_unless (gst_rtsp_client_set_connection (client, conn));
+
+  fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
+          "rtsp://localhost/test/stream=0") == GST_RTSP_OK);
+  str = g_strdup_printf ("%d", cseq);
+  gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
+  g_free (str);
+  gst_rtsp_message_add_header (&request, GST_RTSP_HDR_TRANSPORT,
+      "RTP/AVP;unicast;client_port=5000-5001");
+
+  gst_rtsp_client_set_send_func (client, test_setup_response_200, NULL, NULL);
+  /* We want to verify that server_port holds a single number, not a range */
+  expected_transport =
+      "RTP/AVP;unicast;client_port=5000-5001;server_port=[0-9]+;ssrc=.*;mode=\"PLAY\"";
+  fail_unless (gst_rtsp_client_handle_message (client,
+          &request) == GST_RTSP_OK);
+
+  gst_rtsp_message_unset (&request);
+
+  send_teardown (client, "rtsp://localhost/test");
+  teardown_client (client);
+}
+
+GST_END_TEST;
+
+static void
+test_setup_tcp_two_streams_same_channels_sub (const gchar * mount_point,
+    const gchar * url1, const gchar * url2, const gchar * url3)
+{
+  GstRTSPClient *client;
+  GstRTSPConnection *conn;
+  GstRTSPMessage request = { 0, };
+  gchar *str;
+
+  client = setup_client (NULL, mount_point, TRUE);
   create_connection (&conn);
   fail_unless (gst_rtsp_client_set_connection (client, conn));
 
   /* test SETUP of a video stream with 0-1 as interleaved channels */
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
-          "rtsp://localhost/test/stream=0") == GST_RTSP_OK);
+          url1) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
   g_free (str);
@@ -743,7 +810,7 @@ GST_START_TEST (test_setup_tcp_two_streams_same_channels)
   /* test SETUP of an audio stream with *the same* interleaved channels.
    * we expect the server to allocate new channel numbers */
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
-          "rtsp://localhost/test/stream=1") == GST_RTSP_OK);
+          url2) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_CSEQ, str);
   g_free (str);
@@ -757,14 +824,30 @@ GST_START_TEST (test_setup_tcp_two_streams_same_channels)
           &request) == GST_RTSP_OK);
   gst_rtsp_message_unset (&request);
 
-  send_teardown (client);
+  send_teardown (client, url3);
   teardown_client (client);
+}
+
+GST_START_TEST (test_setup_tcp_two_streams_same_channels)
+{
+  test_setup_tcp_two_streams_same_channels_sub ("/test",
+      "rtsp://localhost/test/stream=0", "rtsp://localhost/test/stream=1",
+      "rtsp://localhost/test");
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_setup_tcp_two_streams_same_channels_root_mount_point)
+{
+  test_setup_tcp_two_streams_same_channels_sub ("/",
+      "rtsp://localhost/stream=0", "rtsp://localhost/stream=1",
+      "rtsp://localhost");
 }
 
 GST_END_TEST;
 
 static GstRTSPClient *
-setup_multicast_client (guint max_ttl)
+setup_multicast_client (guint max_ttl, const gchar * mount_point)
 {
   GstRTSPClient *client;
   GstRTSPSessionPool *session_pool;
@@ -789,7 +872,7 @@ setup_multicast_client (guint max_ttl)
   gst_rtsp_media_factory_add_role (factory, "user",
       "media.factory.access", G_TYPE_BOOLEAN, TRUE,
       "media.factory.construct", G_TYPE_BOOLEAN, TRUE, NULL);
-  gst_rtsp_mount_points_add_factory (mount_points, "/test", factory);
+  gst_rtsp_mount_points_add_factory (mount_points, mount_point, factory);
   gst_rtsp_client_set_mount_points (client, mount_points);
   gst_rtsp_media_factory_set_max_mcast_ttl (factory, max_ttl);
 
@@ -810,7 +893,7 @@ GST_START_TEST (test_client_multicast_transport_404)
   GstRTSPMessage request = { 0, };
   gchar *str;
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, "/test");
 
   /* simple SETUP for non-existing url */
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
@@ -843,7 +926,7 @@ GST_START_TEST (test_client_multicast_transport)
   GstRTSPMessage request = { 0, };
   gchar *str;
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, "/test");
 
   expected_session_timeout = 20;
   g_signal_connect (G_OBJECT (client), "new-session",
@@ -866,7 +949,7 @@ GST_START_TEST (test_client_multicast_transport)
   expected_transport = NULL;
   expected_session_timeout = 60;
 
-  send_teardown (client);
+  send_teardown (client, "rtsp://localhost/test");
 
   teardown_client (client);
 }
@@ -879,7 +962,7 @@ GST_START_TEST (test_client_multicast_ignore_transport_specific)
   GstRTSPMessage request = { 0, };
   gchar *str;
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, "/test");
 
   /* simple SETUP with a valid URI and multicast and a specific dest,
    * but ignore it  */
@@ -898,7 +981,7 @@ GST_START_TEST (test_client_multicast_ignore_transport_specific)
   gst_rtsp_message_unset (&request);
   expected_transport = NULL;
 
-  send_teardown (client);
+  send_teardown (client, "rtsp://localhost/test");
 
   teardown_client (client);
 }
@@ -914,7 +997,7 @@ multicast_transport_specific (void)
   GstRTSPSessionPool *session_pool;
   GstRTSPContext ctx = { NULL };
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, "/test");
 
   ctx.client = client;
   ctx.auth = gst_rtsp_auth_new ();
@@ -954,7 +1037,7 @@ multicast_transport_specific (void)
           &request) == GST_RTSP_OK);
   gst_rtsp_message_unset (&request);
 
-  send_teardown (client);
+  send_teardown (client, "rtsp://localhost/test");
   teardown_client (client);
   g_object_unref (ctx.auth);
   gst_rtsp_token_unref (ctx.token);
@@ -1044,7 +1127,7 @@ test_client_sdp (const gchar * launch_line, guint * bandwidth_val)
   gchar *str;
 
   /* simple DESCRIBE for an existing url */
-  client = setup_client (launch_line);
+  client = setup_client (launch_line, "/test", TRUE);
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_DESCRIBE,
           "rtsp://localhost/test") == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
@@ -1267,12 +1350,12 @@ mcast_transport_two_clients (gboolean shared, const gchar * transport1,
   }
   g_free (client_addr);
 
-  send_teardown (client2);
+  send_teardown (client2, "rtsp://localhost/test");
   gst_rtsp_context_pop_current (&ctx2);
 
   gst_rtsp_context_push_current (&ctx);
   session_id = session_id1;
-  send_teardown (client1);
+  send_teardown (client1, "rtsp://localhost/test");
   gst_rtsp_context_pop_current (&ctx);
 
   teardown_client (client1);
@@ -1416,7 +1499,7 @@ mcast_transport_two_clients_teardown_play (const gchar * transport1,
   /* the first client sends TEARDOWN request */
   gst_rtsp_context_push_current (&ctx);
   session_id = session_id1;
-  send_teardown (client1);
+  send_teardown (client1, "rtsp://localhost/test");
   gst_rtsp_context_pop_current (&ctx);
   teardown_client (client1);
 
@@ -1434,7 +1517,7 @@ mcast_transport_two_clients_teardown_play (const gchar * transport1,
   gst_rtsp_message_unset (&request);
 
   /* client 2 sends TEARDOWN request */
-  send_teardown (client2);
+  send_teardown (client2, "rtsp://localhost/test");
   gst_rtsp_context_pop_current (&ctx2);
 
   teardown_client (client2);
@@ -1720,7 +1803,7 @@ GST_START_TEST (test_client_multicast_invalid_ttl)
   GstRTSPSessionPool *session_pool;
   GstRTSPContext ctx = { NULL };
 
-  client = setup_multicast_client (3);
+  client = setup_multicast_client (3, "/test");
 
   ctx.client = client;
   ctx.auth = gst_rtsp_auth_new ();
@@ -1859,7 +1942,7 @@ do_test_scale_and_speed (const gchar * scale, const gchar * speed,
   gchar *str;
   GstRTSPContext ctx = { NULL };
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, "/test");
 
   ctx.client = client;
   ctx.auth = gst_rtsp_auth_new ();
@@ -1912,7 +1995,7 @@ do_test_scale_and_speed (const gchar * scale, const gchar * speed,
           &request) == GST_RTSP_OK);
   gst_rtsp_message_unset (&request);
 
-  send_teardown (client);
+  send_teardown (client, "rtsp://localhost/test");
   teardown_client (client);
   g_object_unref (ctx.auth);
   gst_rtsp_token_unref (ctx.token);
@@ -1982,15 +2065,16 @@ GST_START_TEST (test_scale_and_speed)
   do_test_scale_and_speed (NULL, "-2", GST_RTSP_STS_BAD_REQUEST);
 }
 
-GST_END_TEST
-GST_START_TEST (test_client_play)
+GST_END_TEST static void
+test_client_play_sub (const gchar * mount_point, const gchar * url1,
+    const gchar * url2)
 {
   GstRTSPClient *client;
   GstRTSPMessage request = { 0, };
   gchar *str;
   GstRTSPContext ctx = { NULL };
 
-  client = setup_multicast_client (1);
+  client = setup_multicast_client (1, mount_point);
 
   ctx.client = client;
   ctx.auth = gst_rtsp_auth_new ();
@@ -2000,7 +2084,7 @@ GST_START_TEST (test_client_play)
   gst_rtsp_context_push_current (&ctx);
 
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_SETUP,
-          "rtsp://localhost/test/stream=0") == GST_RTSP_OK);
+          url1) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_take_header (&request, GST_RTSP_HDR_CSEQ, str);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_TRANSPORT,
@@ -2015,7 +2099,7 @@ GST_START_TEST (test_client_play)
   expected_transport = NULL;
 
   fail_unless (gst_rtsp_message_init_request (&request, GST_RTSP_PLAY,
-          "rtsp://localhost/test") == GST_RTSP_OK);
+          url2) == GST_RTSP_OK);
   str = g_strdup_printf ("%d", cseq);
   gst_rtsp_message_take_header (&request, GST_RTSP_HDR_CSEQ, str);
   gst_rtsp_message_add_header (&request, GST_RTSP_HDR_SESSION, session_id);
@@ -2024,14 +2108,99 @@ GST_START_TEST (test_client_play)
           &request) == GST_RTSP_OK);
   gst_rtsp_message_unset (&request);
 
-  send_teardown (client);
+  send_teardown (client, url2);
   teardown_client (client);
   g_object_unref (ctx.auth);
   gst_rtsp_token_unref (ctx.token);
   gst_rtsp_context_pop_current (&ctx);
 }
 
-GST_END_TEST static Suite *
+GST_START_TEST (test_client_play)
+{
+  test_client_play_sub ("/test", "rtsp://localhost/test/stream=0",
+      "rtsp://localhost/test");
+}
+
+GST_END_TEST;
+
+GST_START_TEST (test_client_play_root_mount_point)
+{
+  test_client_play_sub ("/", "rtsp://localhost/stream=0", "rtsp://localhost");
+}
+
+GST_END_TEST;
+
+#define RTSP_CLIENT_TEST_TYPE (rtsp_client_test_get_type ())
+#define RTSP_CLIENT_TEST_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), RTSP_CLIENT_TEST_TYPE, RtspClientTestClass))
+
+typedef struct RtspClientTest
+{
+  GstRTSPClient parent;
+} RtspClientTest;
+
+typedef struct RtspClientTestClass
+{
+  GstRTSPClientClass parent_class;
+} RtspClientTestClass;
+
+GType rtsp_client_test_get_type (void);
+
+G_DEFINE_TYPE (RtspClientTest, rtsp_client_test, GST_TYPE_RTSP_CLIENT);
+
+static void
+rtsp_client_test_init (RtspClientTest * client)
+{
+}
+
+static void
+rtsp_client_test_class_init (RtspClientTestClass * klass)
+{
+}
+
+static GstRTSPStatusCode
+adjust_error_code_cb (GstRTSPClient * client, GstRTSPContext * ctx,
+    GstRTSPStatusCode code)
+{
+  return GST_RTSP_STS_NOT_FOUND;
+}
+
+GST_START_TEST (test_adjust_error_code)
+{
+  RtspClientTest *client;
+  RtspClientTestClass *klass;
+  GstRTSPClientClass *base_klass;
+  GstRTSPMessage request = { 0, };
+
+  client = g_object_new (RTSP_CLIENT_TEST_TYPE, NULL);
+
+  /* invalid request to trigger error response */
+  ck_assert (gst_rtsp_message_init_request (&request, GST_RTSP_INVALID,
+          "foopy://padoop/") == GST_RTSP_OK);
+
+  /* expect non-adjusted error response 400 */
+  gst_rtsp_client_set_send_func (GST_RTSP_CLIENT (client), test_response_400,
+      NULL, NULL);
+  ck_assert (gst_rtsp_client_handle_message (GST_RTSP_CLIENT (client),
+          &request) == GST_RTSP_OK);
+
+  /* override virtual function for adjusting error code */
+  klass = RTSP_CLIENT_TEST_GET_CLASS (client);
+  base_klass = GST_RTSP_CLIENT_CLASS (klass);
+  base_klass->adjust_error_code = adjust_error_code_cb;
+
+  /* expect error adjusted to 404 */
+  gst_rtsp_client_set_send_func (GST_RTSP_CLIENT (client), test_response_404,
+      NULL, NULL);
+  ck_assert (gst_rtsp_client_handle_message (GST_RTSP_CLIENT (client),
+          &request) == GST_RTSP_OK);
+
+  gst_rtsp_message_unset (&request);
+  g_object_unref (client);
+}
+
+GST_END_TEST;
+
+static Suite *
 rtspclient_suite (void)
 {
   Suite *s = suite_create ("rtspclient");
@@ -2043,8 +2212,13 @@ rtspclient_suite (void)
   tcase_add_test (tc, test_request);
   tcase_add_test (tc, test_options);
   tcase_add_test (tc, test_describe);
+  tcase_add_test (tc, test_describe_root_mount_point);
   tcase_add_test (tc, test_setup_tcp);
+  tcase_add_test (tc, test_setup_tcp_root_mount_point);
+  tcase_add_test (tc, test_setup_no_rtcp);
   tcase_add_test (tc, test_setup_tcp_two_streams_same_channels);
+  tcase_add_test (tc,
+      test_setup_tcp_two_streams_same_channels_root_mount_point);
   tcase_add_test (tc, test_client_multicast_transport_404);
   tcase_add_test (tc, test_client_multicast_transport);
   tcase_add_test (tc, test_client_multicast_ignore_transport_specific);
@@ -2085,6 +2259,8 @@ rtspclient_suite (void)
   tcase_add_test (tc, test_client_multicast_invalid_ttl);
   tcase_add_test (tc, test_scale_and_speed);
   tcase_add_test (tc, test_client_play);
+  tcase_add_test (tc, test_client_play_root_mount_point);
+  tcase_add_test (tc, test_adjust_error_code);
 
   return s;
 }

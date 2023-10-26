@@ -58,6 +58,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_context_get_type@Base 1.4.5
  gst_rtsp_context_pop_current@Base 1.4.5
  gst_rtsp_context_push_current@Base 1.4.5
+ gst_rtsp_context_set_token@Base 1.22.0
  gst_rtsp_latency_bin_get_type@Base 1.16.0
  gst_rtsp_latency_bin_new@Base 1.16.0
  gst_rtsp_media_collect_streams@Base 1.4.5
@@ -86,6 +87,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_factory_get_transport_mode@Base 1.6.0
  gst_rtsp_media_factory_get_type@Base 1.4.5
  gst_rtsp_media_factory_is_bind_mcast_address@Base 1.16.0
+ gst_rtsp_media_factory_is_enable_rtcp@Base 1.19.90
  gst_rtsp_media_factory_is_eos_shutdown@Base 1.4.5
  gst_rtsp_media_factory_is_shared@Base 1.4.5
  gst_rtsp_media_factory_is_stop_on_disonnect@Base 1.8.0
@@ -96,6 +98,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_factory_set_clock@Base 1.8.0
  gst_rtsp_media_factory_set_do_retransmission@Base 1.16.0
  gst_rtsp_media_factory_set_dscp_qos@Base 1.18.0
+ gst_rtsp_media_factory_set_enable_rtcp@Base 1.19.90
  gst_rtsp_media_factory_set_eos_shutdown@Base 1.4.5
  gst_rtsp_media_factory_set_latency@Base 1.6.0
  gst_rtsp_media_factory_set_launch@Base 1.4.5
@@ -253,6 +256,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_server_set_thread_pool@Base 1.4.5
  gst_rtsp_server_transfer_connection@Base 1.4.5
  gst_rtsp_session_allow_expire@Base 1.4.5
+ gst_rtsp_session_dup_media@Base 1.19.90
  gst_rtsp_session_filter@Base 1.4.5
  gst_rtsp_session_get_header@Base 1.4.5
  gst_rtsp_session_get_media@Base 1.4.5
@@ -401,6 +405,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_stream_transport_set_transport@Base 1.4.5
  gst_rtsp_stream_transport_set_url@Base 1.4.5
  gst_rtsp_stream_unblock_linked@Base 1.14.0
+ gst_rtsp_stream_unblock_rtcp@Base 1.19.90
  gst_rtsp_stream_update_crypto@Base 1.4.5
  gst_rtsp_stream_verify_mcast_ttl@Base 1.16.0
  gst_rtsp_suspend_mode_get_type@Base 1.4.5

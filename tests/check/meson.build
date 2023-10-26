@@ -3,11 +3,11 @@ if gst_dep.type_name() == 'pkgconfig'
   pbase = dependency('gstreamer-plugins-base-' + api_version, required: true)
   pbad = dependency('gstreamer-plugins-bad-' + api_version, required: true)
 
-  pluginsdirs = [gst_dep.get_pkgconfig_variable('pluginsdir'),
-                 pbase.get_pkgconfig_variable('pluginsdir'),
-                 pbad.get_pkgconfig_variable('pluginsdir')]
+  pluginsdirs = [gst_dep.get_variable('pluginsdir'),
+                 pbase.get_variable('pluginsdir'),
+                 pbad.get_variable('pluginsdir')]
 
-  gst_plugin_scanner_dir = gst_dep.get_pkgconfig_variable('pluginscannerdir')
+  gst_plugin_scanner_dir = gst_dep.get_variable('pluginscannerdir')
 else
   gst_plugin_scanner_dir = subproject('gstreamer').get_variable('gst_scanner_dir')
 endif
@@ -47,10 +47,10 @@ foreach test_name : rtsp_server_tests
   env = environment()
   env.set('GST_PLUGIN_SYSTEM_PATH_1_0', '')
   env.set('GST_STATE_IGNORE_ELEMENTS', '')
-  env.set('GST_PLUGIN_LOADING_WHITELIST', 'gstreamer:gst-plugins-base:gst-plugins-good:gst-plugins-bad:gst-rtsp-server@' + meson.build_root())
+  env.set('GST_PLUGIN_LOADING_WHITELIST', 'gstreamer:gst-plugins-base:gst-plugins-good:gst-plugins-bad:gst-rtsp-server@' + meson.project_build_root())
   env.set('CK_DEFAULT_TIMEOUT', '120')
   env.set('GST_REGISTRY', join_paths(meson.current_build_dir(), '@0@.registry'.format(test_name)))
-  env.set('GST_PLUGIN_PATH_1_0', [meson.build_root()] + pluginsdirs)
+  env.set('GST_PLUGIN_PATH_1_0', [meson.global_build_root()] + pluginsdirs)
   env.set('GST_PLUGIN_SCANNER_1_0', gst_plugin_scanner_path)
 
   exe = executable(test_name, fname,
