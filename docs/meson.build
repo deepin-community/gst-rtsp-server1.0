@@ -9,21 +9,39 @@ if meson.is_cross_build()
     subdir_done()
 endif
 
+if static_build
+    if get_option('doc').enabled()
+        error('Documentation enabled but not supported when building statically.')
+    endif
+
+    message('Building statically, can\'t build the documentation')
+    subdir_done()
+endif
+
+if not build_gir
+    if get_option('doc').enabled()
+        error('Documentation enabled but introspection not built.')
+    endif
+
+    message('Introspection not built, can\'t build the documentation')
+    subdir_done()
+endif
+
 required_hotdoc_extensions = ['gi-extension', 'gst-extension']
 if gst_dep.type_name() == 'internal'
     gst_proj = subproject('gstreamer')
     plugins_cache_generator = gst_proj.get_variable('plugins_cache_generator')
 else
     required_hotdoc_extensions += ['gst-extension']
-    plugins_cache_generator = find_program(join_paths(gst_dep.get_pkgconfig_variable('libexecdir'), 'gstreamer-' + api_version, 'gst-plugins-doc-cache-generator'),
+    plugins_cache_generator = find_program(join_paths(gst_dep.get_variable('libexecdir'), 'gstreamer-' + api_version, 'gst-plugins-doc-cache-generator'),
         required: false)
 endif
 
-plugins_cache = join_paths(meson.current_source_dir(), 'gst_plugins_cache.json')
+plugins_cache = join_paths(meson.current_source_dir(), 'plugins', 'gst_plugins_cache.json')
 if plugins.length() == 0
     message('All rtsp-server plugins have been disabled')
 elif plugins_cache_generator.found()
-    plugins_doc_dep = custom_target('rtsp-server-plugins-doc-cache',
+    gst_plugins_doc_dep = custom_target('rtsp-server-plugins-doc-cache',
         command: [plugins_cache_generator, plugins_cache, '@OUTPUT@', '@INPUT@'],
         input: plugins,
         output: 'gst_plugins_cache.json',
@@ -39,7 +57,7 @@ if not hotdoc_p.found()
 endif
 
 hotdoc_req = '>= 0.11.0'
-hotdoc_version = run_command(hotdoc_p, '--version').stdout()
+hotdoc_version = run_command(hotdoc_p, '--version', check: false).stdout()
 if not hotdoc_version.version_compare(hotdoc_req)
     if get_option('doc').enabled()
         error('Hotdoc version @0@ not found, got @1@'.format(hotdoc_req, hotdoc_version))
@@ -61,15 +79,6 @@ foreach extension: required_hotdoc_extensions
     endif
 endforeach
 
-if not build_gir
-    if get_option('doc').enabled()
-        error('Documentation enabled but introspection not built.')
-    endif
-
-    message('Introspection not built, can\'t build the documentation')
-    subdir_done()
-endif
-
 build_hotdoc = true
 hotdoc = import('hotdoc')
 
@@ -82,13 +91,14 @@ libs_doc = [hotdoc.generate_doc('gst-rtsp-server',
     gi_index: 'index.md',
     gi_smart_index: true,
     gi_order_generated_subpages: true,
+    depends: rtsp_server_gir[0],
 )]
 
 plugins_doc = [hotdoc.generate_doc('rtspclientsink',
     project_version: api_version,
-    sitemap: 'plugin-sitemap.txt',
-    index: 'plugin-index.md',
-    gst_index: 'plugin-index.md',
+    sitemap: 'plugins/sitemap.txt',
+    index: 'plugins/index.md',
+    gst_index: 'plugins/index.md',
     gst_c_sources: ['../gst/rtsp-sink/*.[ch]'],
     gst_dl_sources: [rtspsink.full_path()],
     gst_smart_index: true,
