@@ -61,6 +61,7 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_context_set_token@Base 1.22.0
  gst_rtsp_latency_bin_get_type@Base 1.16.0
  gst_rtsp_latency_bin_new@Base 1.16.0
+ gst_rtsp_media_can_be_shared@Base 1.24.0
  gst_rtsp_media_collect_streams@Base 1.4.5
  gst_rtsp_media_complete_pipeline@Base 1.14.0
  gst_rtsp_media_create_stream@Base 1.4.5
@@ -73,6 +74,8 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_factory_get_clock@Base 1.8.0
  gst_rtsp_media_factory_get_do_retransmission@Base 1.16.0
  gst_rtsp_media_factory_get_dscp_qos@Base 1.18.0
+ gst_rtsp_media_factory_get_ensure_keyunit_on_start@Base 1.24.0
+ gst_rtsp_media_factory_get_ensure_keyunit_on_start_timeout@Base 1.24.0
  gst_rtsp_media_factory_get_latency@Base 1.6.0
  gst_rtsp_media_factory_get_launch@Base 1.4.5
  gst_rtsp_media_factory_get_max_mcast_ttl@Base 1.16.0
@@ -99,6 +102,8 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_factory_set_do_retransmission@Base 1.16.0
  gst_rtsp_media_factory_set_dscp_qos@Base 1.18.0
  gst_rtsp_media_factory_set_enable_rtcp@Base 1.19.90
+ gst_rtsp_media_factory_set_ensure_keyunit_on_start@Base 1.24.0
+ gst_rtsp_media_factory_set_ensure_keyunit_on_start_timeout@Base 1.24.0
  gst_rtsp_media_factory_set_eos_shutdown@Base 1.4.5
  gst_rtsp_media_factory_set_latency@Base 1.6.0
  gst_rtsp_media_factory_set_launch@Base 1.4.5
@@ -126,6 +131,8 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_get_do_retransmission@Base 1.16.0
  gst_rtsp_media_get_dscp_qos@Base 1.18.0
  gst_rtsp_media_get_element@Base 1.4.5
+ gst_rtsp_media_get_ensure_keyunit_on_start@Base 1.24.0
+ gst_rtsp_media_get_ensure_keyunit_on_start_timeout@Base 1.24.0
  gst_rtsp_media_get_latency@Base 1.6.0
  gst_rtsp_media_get_max_mcast_ttl@Base 1.16.0
  gst_rtsp_media_get_multicast_iface@Base 1.10.0
@@ -166,6 +173,8 @@ libgstrtspserver-1.0.so.0 libgstrtspserver-1.0-0 #MINVER#
  gst_rtsp_media_set_clock@Base 1.8.0
  gst_rtsp_media_set_do_retransmission@Base 1.16.0
  gst_rtsp_media_set_dscp_qos@Base 1.18.0
+ gst_rtsp_media_set_ensure_keyunit_on_start@Base 1.24.0
+ gst_rtsp_media_set_ensure_keyunit_on_start_timeout@Base 1.24.0
  gst_rtsp_media_set_eos_shutdown@Base 1.4.5
  gst_rtsp_media_set_latency@Base 1.6.0
  gst_rtsp_media_set_max_mcast_ttl@Base 1.16.0

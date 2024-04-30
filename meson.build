@@ -1,6 +1,6 @@
 project('gst-rtsp-server', 'c',
-  version : '1.22.6',
-  meson_version : '>= 0.62',
+  version : '1.24.2',
+  meson_version : '>= 1.1',
   default_options : ['warning_level=1', 'buildtype=debugoptimized'])
 
 gst_version = meson.project_version()
@@ -16,7 +16,7 @@ endif
 gst_version_is_stable = gst_version_minor.is_even()
 gst_version_is_dev = gst_version_minor.is_odd() and gst_version_micro < 90
 
-glib_req = '>= 2.62.0'
+glib_req = '>= 2.64.0'
 
 if gst_version_is_stable
   gst_req = '>= @0@.@1@.0'.format(gst_version_major, gst_version_minor)
@@ -146,6 +146,8 @@ gstsdp_dep = dependency('gstreamer-sdp-1.0', version : gst_req,
   fallback : ['gst-plugins-base', 'sdp_dep'])
 gstapp_dep = dependency('gstreamer-app-1.0', version : gst_req,
   fallback : ['gst-plugins-base', 'app_dep'])
+gstvideo_dep = dependency('gstreamer-video-1.0', version : gst_req,
+  fallback : ['gst-plugins-base', 'video_dep'])
 gstnet_dep = dependency('gstreamer-net-1.0', version : gst_req,
   fallback : ['gstreamer', 'gst_net_dep'])
 if host_machine.system() != 'windows'
@@ -192,12 +194,10 @@ static_build = get_option('default_library') == 'static'
 gst_libraries = []
 
 subdir('gst')
-if not get_option('tests').disabled()
-  subdir('tests')
-endif
-if not get_option('examples').disabled()
-  subdir('examples')
-endif
+
+subdir('tests')
+subdir('examples')
+
 subdir('docs')
 
 # Set release date
@@ -209,9 +209,14 @@ if gst_version_nano == 0
   message('Package release date: ' + release_date)
 endif
 
+glib_gio_dep = dependency('gio-2.0', version: glib_req)
+if glib_gio_dep.version().version_compare('< 2.67.4')
+  cdata.set('g_memdup2(ptr,sz)', '(G_LIKELY(((guint64)(sz)) < G_MAXUINT)) ? g_memdup(ptr,sz) : (g_abort(),NULL)')
+endif
+
 configure_file(output: 'config.h', configuration: cdata)
 
-meson.add_dist_script('scripts/gen-changelog.py', meson.project_name(), '1.20.0', meson.project_version())
+meson.add_dist_script('scripts/gen-changelog.py', meson.project_name(), '1.22.0', meson.project_version())
 
 plugin_names = []
 gst_plugins = []

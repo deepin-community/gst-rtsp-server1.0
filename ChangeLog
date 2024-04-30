@@ -1,84 +1,292 @@
-=== release 1.22.6 ===
+=== release 1.24.2 ===
 
-2023-09-20 18:10:57 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.22.6
-
-2023-07-20 16:57:47 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5082>
-
-=== release 1.22.5 ===
-
-2023-07-20 15:22:48 +0100  Tim-Philipp Müller <tim@centricular.com>
+2024-04-09 21:48:55 +0100  Tim-Philipp Müller <tim@centricular.com>
 
 	* NEWS:
 	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
 	* gst-rtsp-server.doap:
 	* meson.build:
-	  Release 1.22.5
+	  Release 1.24.2
 
-2023-06-20 19:10:38 +0100  Tim-Philipp Müller <tim@centricular.com>
+2024-03-22 01:38:06 +0100  Tim-Philipp Müller <tim@centricular.com>
 
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4907>
-
-=== release 1.22.4 ===
-
-2023-06-20 17:42:25 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.22.4
-
-2023-05-19 12:36:19 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4679>
-
-=== release 1.22.3 ===
-
-2023-05-19 09:23:19 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.22.3
-
-2023-04-12 00:31:17 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
 	* meson.build:
 	  Back to development
 
-=== release 1.22.2 ===
+=== release 1.24.1 ===
 
-2023-04-11 17:29:28 +0100  Tim-Philipp Müller <tim@centricular.com>
+2024-03-21 21:47:53 +0100  Tim-Philipp Müller <tim@centricular.com>
 
 	* NEWS:
 	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
 	* gst-rtsp-server.doap:
 	* meson.build:
-	  Release 1.22.2
+	  Release 1.24.1
+
+2024-02-08 01:36:43 +0300  Mikhail Rudenko <mike.rudenko@gmail.com>
+
+	* gst/rtsp-server/rtsp-stream.c:
+	  rtsp-stream: clear sockets when leaving bin
+	  Since commit 4d86f994, when setting an RTSP media both shared and
+	  reusable, streaming cannot be restarted after the first time all the
+	  clients disconnect. That happens because the sockets (unlike
+	  addresses) of GstRTSPStream are not cleared in
+	  gst_rtsp_stream_leave_bin, and on restart sockets and addresses are
+	  not allocated in gst_rtsp_stream_allocate_udp_sockets, and then the
+	  check in create_sender_part fails. Fix this by clearing sockets in
+	  gst_rtsp_stream_leave_bin.
+	  Fixes gstreamer/gst-rtsp-server#113
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6334>
+
+2024-02-16 18:12:37 +0100  Mathieu Duponchelle <mathieu@centricular.com>
+
+	* tests/check/gst/onvif.c:
+	  onvif: tests: check for T flag on all packets
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6298>
+
+2024-03-05 13:45:27 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* meson.build:
+	  Back to development
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6264>
+
+=== release 1.24.0 ===
+
+2024-03-04 23:51:42 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* NEWS:
+	* RELEASE:
+	* gst-rtsp-server.doap:
+	* meson.build:
+	  Release 1.24.0
+
+2024-02-26 09:27:40 +0100  Edward Hervey <edward@centricular.com>
+
+	* RELEASE:
+	  docs: Use Discourse and Matrix as prefered communication channels
+	  Part of: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6220
+
+=== release 1.23.90 ===
+
+2024-02-23 18:20:11 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* NEWS:
+	* RELEASE:
+	* gst-rtsp-server.doap:
+	* meson.build:
+	  Release 1.23.90
+
+2024-02-15 16:38:53 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* meson.build:
+	  Back to development
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6126>
+
+=== release 1.23.2 ===
+
+2024-02-15 15:37:17 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* NEWS:
+	* RELEASE:
+	* gst-rtsp-server.doap:
+	* meson.build:
+	  Release 1.23.2
+
+2024-02-06 18:09:02 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* meson.build:
+	  Back to development
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6066>
+
+=== release 1.23.1 ===
+
+2024-02-06 16:37:19 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* NEWS:
+	* RELEASE:
+	* gst-rtsp-server.doap:
+	* meson.build:
+	  Release 1.23.1
+
+2024-01-28 11:15:01 +0000  Tim-Philipp Müller <tim@centricular.com>
+
+	* meson.build:
+	  meson: bump Meson requirement to >= 1.1 for all modules
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/6002>
+
+2024-01-16 21:21:20 +0530  Nirbheek Chauhan <nirbheek@centricular.com>
+
+	* examples/test-launch.c:
+	  gst-rtsp-server: Dump test-launch debug graph every 5 seconds
+	  This also serves as an example of how to fetch the pipeline from
+	  a running media and doing something else with it.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5928>
+
+2023-11-08 10:58:33 +0100  Patricia Muscalu <patricia@axis.com>
+
+	* gst/rtsp-server/rtsp-media.c:
+	  rtsp-server: Unprepare media that is in error state
+	  Without this patch a prepared media that entered an error state
+	  remains unprepared.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5621>
+
+2022-04-06 12:56:30 +0100  Tim-Philipp Müller <tim@centricular.com>
+
+	* meson.build:
+	  meson: Bump GLib requirement to >= 2.64
+	  This includes fixes to make GstBus watches non-racy.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2126>
+
+2021-05-13 22:25:55 -0400  Doug Nazar <nazard@nazar.ca>
+
+	* gst/rtsp-sink/gstrtspclientsink.c:
+	  rtspclientsink: Don't leak previous server_ip
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5497>
+
+2023-10-02 08:33:19 +0200  Jacob Johnsson <jacobj@axis.com>
+
+	* gst/rtsp-server/rtsp-media.c:
+	  rtsp-server: Only unblock live streams when complete
+	  When media consists of multiple streams we should only unblock the
+	  complete streams.
+	  Fixes #2443
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4334>
+
+2023-06-26 08:25:36 +0200  Jacob Johnsson <jacobj@axis.com>
+
+	* gst/rtsp-server/meson.build:
+	* gst/rtsp-server/rtsp-media-factory.c:
+	* gst/rtsp-server/rtsp-media-factory.h:
+	* gst/rtsp-server/rtsp-media.c:
+	* gst/rtsp-server/rtsp-media.h:
+	* gst/rtsp-server/rtsp-onvif-media-factory.c:
+	* gst/rtsp-server/rtsp-server-internal.h:
+	* gst/rtsp-server/rtsp-stream.c:
+	* meson.build:
+	* tests/check/meson.build:
+	  rtsp-server: Add new ensure-keyunit-on-start property
+	  While the suspend modes NONE and PAUSED provided a low startup latency
+	  for connecting clients they did not ensure that streams started on
+	  fresh data.
+	  With this property we can maintain the low startup latency of those
+	  suspend modes while also ensuring that a stream starts on a key unit.
+	  Furthermore, by modifying the value of a new property,
+	  ensure-keyunit-on-start-timeout, it is possible to accept a keyunit of
+	  a certain age but discard it if too much time has passed and instead
+	  force a new keyunit.
+	  Fixes #2443
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4334>
+
+2023-08-05 17:27:31 +0100  Tim-Philipp Müller <tim@centricular.com>
+
+	* docs/plugins/gst_plugins_cache.json:
+	* gst/glib-compat-private.h:
+	* gst/rtsp-sink/gstrtspclientsink.c:
+	  rtspsink: use version template in user-agent property
+	  Avoids documentation churn when the version changes.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5090>
+
+2023-07-05 18:46:25 -0600  Olivier Crête <olivier.crete@collabora.com>
+
+	* scripts/gen-changelog.py:
+	  gst-omx: Retire the whole package
+	  The OpenMAX standard is long dead and even the Raspberry Pi OS
+	  no longer supports it.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4976>
+
+2023-07-12 09:27:22 +0530  Nirbheek Chauhan <nirbheek@centricular.com>
+
+	* tests/check/meson.build:
+	  meson: Always use forward slashes in defines with paths
+	  Fixes the following build failure on MSYS2:
+	  ```
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c: In function 'test_seeking':
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: error: incomplete universal character name \U
+	  107 |   g_object_set (G_OBJECT (src), "location", TESTFILE, NULL);
+	  |                                                     ^
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: warning: unknown escape sequence: '\A'
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: warning: unknown escape sequence: '\g'
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: warning: unknown escape sequence: '\s'
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: warning: unknown escape sequence: '\g'
+	  ../subprojects/gstreamer/tests/check/elements/filesrc.c:107:53: warning: unknown escape sequence: '\c'
+	  ```
+	  Due to: `-DTESTFILE=\"C:\\Users\\Administrator\[...]`
+	  https://gitlab.freedesktop.org/nirbheek/gstreamer/-/jobs/45317733
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/5018>
+
+2023-06-11 15:33:33 +0800  James Oliver <james.oliver@icetana.com.au>
+
+	* docs/plugins/gst_plugins_cache.json:
+	* gst/rtsp-sink/gstrtspclientsink.c:
+	* gst/rtsp-sink/gstrtspclientsink.h:
+	  rtspclientsink: add RTSP address pool for unicast UDP
+	  Adds an address pool for rtspclientsink in order to allow the
+	  "port-range" property to restrict the ports available for the RTSP
+	  streams rather than always using the ephemeral port-range.
+	  If a value is not provided to the "port-range" property, rtspclientsink
+	  will select random ports from the ephemeral port-range as before.
+	  Fixes https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/2606
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4828>
+
+2023-03-07 14:05:54 +0100  Stéphane Cerveau <scerveau@igalia.com>
+
+	* examples/meson.build:
+	* meson.build:
+	* tests/meson.build:
+	  gstreamer-full: add full static support
+	  Allow a project to use gstreamer-full as a static library
+	  and link to create a binary without dependencies.
+	  Introduce the option 'gst-full-target-type' to
+	  select the build type, dynamic(default) or static.
+	  In gstreamer-full/static build configuration gstreamer (gst.c)
+	  needs the symbol gst_init_static_plugins which is defined
+	  in gstreamer-full.
+	  All the tests and examples are linking with gstreamer but the
+	  symbol gst_init_static_plugins is only defined in the gstreamer-full
+	  library. gstreamer-full can not be built first as it needs to know what plugins
+	  will be built.
+	  One option would be to build all the examples and tests after
+	  gstreamer-full as the tools.
+	  Disable tools build in subprojects too as it will be built at the end of
+	  build process.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4128>
+
+2023-05-11 21:09:25 +0300  Sebastian Dröge <sebastian@centricular.com>
+
+	* gst/rtsp-server/rtsp-client.c:
+	* gst/rtsp-server/rtsp-media-factory.c:
+	* gst/rtsp-server/rtsp-media.c:
+	* gst/rtsp-server/rtsp-media.h:
+	* tests/check/gst/media.c:
+	* tests/check/gst/mediafactory.c:
+	* tests/check/gst/sessionmedia.c:
+	  rtsp-server: media-factory: Make sure a shared media is actually still usable
+	  Previously it was possible that a shared media was just in the process
+	  of being unprepared because the last client disappeared, while another
+	  client retrieved it from the cache and then tried to use it. Unless the
+	  media was reusable this would've then failed unnecessarily.
+	  To avoid this it is necessary to lock the media directly in
+	  gst_rtsp_media_factory_construct() and return a locked media. After
+	  locking the cached media it is necessary to check if the media was ever
+	  unprepared or is actually reusable and based on that either reuse it or
+	  create a new media.
+	  This minimally changes the gst_rtsp_media_factory_construct() API to
+	  always return a locked media, and adds a new
+	  gst_rtsp_media_can_be_shared() function to check if a media can actually
+	  be shared in practice.
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4606>
+
+2023-03-19 15:35:29 -0300  Thibault Saunier <tsaunier@igalia.com>
+
+	* docs/meson.build:
+	  doc: Avoid shelling out to hotdoc to generate plugins config files
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4479>
+
+2022-08-31 14:15:16 -0400  Thibault Saunier <tsaunier@igalia.com>
+
+	* gst/rtsp-server/meson.build:
+	  gir: Checkout all .gir files and check that they are updated on the CI
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3010>
 
 2023-04-04 20:03:31 +0300  Sebastian Dröge <sebastian@centricular.com>
 
@@ -86,509 +294,43 @@
 	  rtsp-server: media: First set state to PLAYING again temporarily, then send EOS
 	  Sending the EOS event while the pipeline is PAUSED can deadlock on the
 	  stream lock if a sink is currently blocked because of pre-rolling.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4345>
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4340>
 
-2023-03-04 16:13:04 +0000  Tim-Philipp Müller <tim@centricular.com>
+2023-03-15 18:56:21 +0000  Tim-Philipp Müller <tim@centricular.com>
 
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
+	* gst/rtsp-server/rtsp-client.c:
+	* gst/rtsp-server/rtsp-sdp.c:
+	  gst-rtsp-server: re-indent with GNU indent 2.2.12
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/4182>
 
-=== release 1.22.1 ===
+2023-02-11 19:55:41 +0100  Jan Vermaete <jan.vermaete@gmail.com>
 
-2023-03-04 13:42:32 +0000  Tim-Philipp Müller <tim@centricular.com>
+	* examples/test-launch.c:
+	  rtsp-server: test-launch: added the argument mount/m to specify the mountpoint
+	  Default is the previous hardcoded "/test"
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3942>
 
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.22.1
+2023-01-24 20:13:50 +0000  Tim-Philipp Müller <tim@centricular.com>
 
-2023-01-25 16:46:42 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-
-=== release 1.22.0 ===
-
-2023-01-23 19:29:34 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.22.0
-
-=== release 1.21.90 ===
-
-2023-01-13 19:08:48 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.21.90
-
-2022-12-16 11:16:52 +0200  Sebastian Dröge <sebastian@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* gst/rtsp-sink/gstrtspclientsink.c:
-	* gst/rtsp-sink/gstrtspclientsink.h:
-	  rtspclientsink: Add `publish-clock-mode` property
-	  This allows modifying the behaviour how/if the pipeline clock is
-	  published according to RFC7273, similar to the same API on
-	  `GstRTSPMedia`.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3581>
-
-2023-01-04 13:46:15 +0200  Sebastian Dröge <sebastian@centricular.com>
-
-	* gst/rtsp-sink/gstrtspclientsink.c:
-	  rtspclientsink: Fix docs for various properties
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3581>
-
-2023-01-04 21:37:55 +0100  Mathieu Duponchelle <mathieu@centricular.com>
-
-	* docs/meson.build:
-	  docs: explicitly declare gir build dependencies
-	  As the path to the gir file is passed to hotdoc.generate_doc() and
-	  not the build target itself, meson doesn't know about the dependency.
-	  In turn, as the CI doesn't build everything before building the
-	  documentation target, some gir files might not exist, for instance
-	  in the case of gst-rtsp-server, causing the output documentation to
-	  be empty.
-	  The error occurred silently because hotdoc accepts wildcards for
-	  *-sources arguments, thus it won't warn about a missing gir file as
-	  it is legitimate for glob matching to resolve to nothing.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3686>
-
-2022-12-13 08:58:43 -0500  Xavier Claessens <xavier.claessens@collabora.com>
-
-	* meson.build:
-	  Fix API visibility macros
-	  This copies the logic from GLib discussed there:
-	  https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2936
-	  Beside being simpler, it also fix all public symbols being annotated
-	  with dllexport when doing a static build, as discovered there:
-	  https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3540#note_1678335
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3567>
-
-2022-12-05 02:29:08 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-
-=== release 1.21.3 ===
-
-2022-12-05 01:28:21 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.21.3
-
-2022-12-04 12:25:41 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* ChangeLog:
-	  Remove ChangeLog files from git repository
-	  This information is tracked fully in the git repository, so
-	  no point having the ChangeLog duplicate it, and it interferes
-	  with grepping the repository.
-	  We are going to create the ChangeLogs on the fly when generating
-	  tarballs going forward (with a limited history), since it's still
-	  valuable for tarball consumers to be able to easily see a list of
-	  recent changes.
-	  Fixes https://gitlab.freedesktop.org/gstreamer/gstreamer-project/-/issues/73
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3521>
-
-2022-11-07 00:10:39 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* meson.build:
-	* scripts/gen-changelog.py:
-	  meson: Generate ChangeLog files for release tarballs on dist
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3521>
-
-2022-11-10 08:00:32 +0000  Christian Wick <c.wick@mail.de>
-
-	* examples/meson.build:
-	  gst-rtsp-server: compile example for onvif backchannel testing
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3363>
-
-2022-11-08 02:08:08 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3358>
-
-=== release 1.21.2 ===
-
-2022-11-07 23:53:59 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* ChangeLog:
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.21.2
-
-2022-11-07 23:53:57 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* ChangeLog:
-	  Update ChangeLogs for 1.21.2
-
-2022-10-25 09:39:07 +0300  Sebastian Dröge <sebastian@centricular.com>
-
-	* gst/rtsp-server/rtsp-server.c:
-	  Fix various warnings from gobject-introspection
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3261>
-
-2022-10-15 12:40:04 +0300  Sebastian Dröge <sebastian@centricular.com>
-
-	* gst/rtsp-server/rtsp-auth.c:
-	* gst/rtsp-server/rtsp-latency-bin.c:
+	* gst/rtsp-server/rtsp-address-pool.c:
 	* gst/rtsp-server/rtsp-media-factory.c:
 	* gst/rtsp-server/rtsp-media.c:
-	* gst/rtsp-server/rtsp-onvif-media-factory.c:
+	* gst/rtsp-server/rtsp-mount-points.c:
+	* gst/rtsp-server/rtsp-permissions.c:
 	* gst/rtsp-server/rtsp-server.c:
 	* gst/rtsp-server/rtsp-stream.c:
-	  rtsp-server: Add/fix various annotations
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3194>
-
-2022-10-14 08:53:18 +0200  Edward Hervey <edward@centricular.com>
-
-	* gst/rtsp-server/rtsp-client.h:
-	  rtsp-client: Remove duplicate documentation
-	  Confuses the documentation builder, since it's documented twice it complains
-	  about a missing "Since:" marker whereas it's present in the documentation
-	  comment further down
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3180>
-
-2022-08-19 16:16:26 +0200  Linus Svensson <linussn@axis.com>
-
-	* gst/rtsp-server/rtsp-server.c:
-	  rtsp-server: Free client if no connection could be created
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3164>
-
-2022-10-11 14:55:48 +0200  Peter Stensson <petest@axis.com>
-
-	* gst/rtsp-server/rtsp-client.h:
-	  rtsp-server: Add since marker for adjust_error_code
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3157>
-
-2022-06-21 09:51:55 +0200  Peter Stensson <petest@axis.com>
-
-	* gst/rtsp-server/rtsp-client.c:
-	* gst/rtsp-server/rtsp-client.h:
-	* gst/rtsp-server/rtsp-media.c:
-	* tests/check/gst/client.c:
-	* tests/check/gst/media.c:
-	  rtsp-server: Add support for adjusting request response on pipeline errors
-	  The idea is to give the application the possibility to adjust the error
-	  code when responding to a request. For that purpose the pipeline's bus
-	  messages are emitted to subscribers through a signal handle-message.
-	  The subscribers can then check those messages for errors and adjust
-	  the response error code by overriding the virtual method
-	  adjust_error_code().
-	  Fixes #1294
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2972>
-
-2022-10-04 03:57:31 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/plugins/gst_plugins_cache.json:
-	* meson.build:
-	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3115>
-
-=== release 1.21.1 ===
-
-2022-10-04 01:14:01 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* ChangeLog:
-	* NEWS:
-	* RELEASE:
-	* docs/plugins/gst_plugins_cache.json:
-	* gst-rtsp-server.doap:
-	* meson.build:
-	  Release 1.21.1
-
-2022-10-04 01:13:59 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* ChangeLog:
-	  Update ChangeLogs for 1.21.1
-
-2022-09-21 19:19:45 +0530  Nirbheek Chauhan <nirbheek@centricular.com>
-
-	* meson.build:
-	  meson: Use implicit builtin dirs in pkgconfig generation
-	  Starting with Meson 0.62, meson automatically populates the variables
-	  list in the pkgconfig file if you reference builtin directories in the
-	  pkgconfig file (whether via a custom pkgconfig variable or elsewhere).
-	  We need this, because ${prefix}/libexec is a hard-coded value which is
-	  incorrect on, for example, Debian.
-	  Bump requirement to 0.62, and remove version compares that retained
-	  support for older Meson versions.
-	  Fixes https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/1245
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3061>
-
-2021-03-24 14:20:18 -0500  Zebediah Figura <z.figura12@gmail.com>
-
-	* meson.build:
-	  meson: Build with -Wl,-z,nodelete to prevent unloading of dynamic libraries and plugins
-	  GLib made the unfortunate decision to prevent libgobject from ever being
-	  unloaded, which means that now any library which registers a static type
-	  can't ever be unloaded either (and any library that depends on those,
-	  ad nauseam).
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/778>
-
-2022-09-05 13:28:18 +1200  Chris Wiggins <chris@chriswiggins.co.nz>
-
-	* gst/rtsp-server/rtsp-context.c:
-	* gst/rtsp-server/rtsp-context.h:
-	  rtsp-server: context: Add method to set the RTSPToken on some RTSPContext
-	  Fixes #1399.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2979>
-
-2022-08-24 19:50:19 +0800  Bruce Liang <Bruce.Liang@Abilitycorp.com.tw>
-
-	* gst/rtsp-server/rtsp-server-internal.h:
-	* gst/rtsp-server/rtsp-stream-transport.c:
-	* gst/rtsp-server/rtsp-stream.c:
-	  gst-rtsp-server: Fix pushing backlog to client
-	  Check back pressure of a stream transport before popping buffer from its backlog.
-	  If the stream transport is not experiencing back pressure, the buffer can be popped from backlog and pushed to client.
-	  Fixes:#1298
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2936>
-
-2022-09-02 16:31:54 +0300  Sebastian Dröge <sebastian@centricular.com>
-
-	* gst/rtsp-server/rtsp-stream.c:
-	  rtsp-server: stream: Don't loop forever if binding to the multicast address fails
-	  The address/port is pre-defined by the caller of the function, so
-	  retrying is only going to loop forever.
-	  Ideally the multicast address should be checked after allocating but
-	  this doesn't happen currently, so it's better to error out cleanly then
-	  to loop forever trying the same address.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2975>
-
-2022-09-01 15:11:31 -0400  Thibault Saunier <tsaunier@igalia.com>
-
-	* gst/rtsp-sink/meson.build:
-	* meson.build:
-	  meson: Call pkgconfig.generate in the loop where we declare plugins dependencies
-	  Removing some copy pasted code
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2970>
-
-2022-09-01 11:51:48 -0400  Thibault Saunier <tsaunier@igalia.com>
-
-	* docs/meson.build:
-	* gst/rtsp-server/meson.build:
-	* meson.build:
-	  meson: Namespace the plugins_doc_dep/libraries variables
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2970>
-
-2022-08-31 18:44:14 -0400  Thibault Saunier <tsaunier@igalia.com>
-
-	* meson.build:
-	  meson: Rename plugins list and make them "dependency" objects
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2970>
-
-2022-05-25 18:40:30 +0530  Nirbheek Chauhan <nirbheek@centricular.com>
-
-	* gst/rtsp-sink/gstrtspclientsink.c:
-	  rtsp+rtmp: Forward warning added to tls-validation-flags to our users
-	  With the 2.72 release, glib-networking developers have decided that
-	  TLS certificate validation cannot be implemented correctly by them, so
-	  they've deprecated it.
-	  In a nutshell: a cert can have several validation errors, but there
-	  are no guarantees that the TLS backend will return all those errors,
-	  and things are made even more complicated by the fact that the list of
-	  errors might refer to certs that are added for backwards-compat and
-	  won't actually be used by the TLS library.
-	  Our best option is to ignore the deprecation and pass the warning onto
-	  users so they can make an appropriate security decision regarding
-	  this.
-	  We can't deprecate the tls-validation-flags property because it is
-	  very useful when connecting to RTSP cameras that will never get
-	  updates to fix certificate errors.
-	  Relevant upstream merge requests / issues:
-	  https://gitlab.gnome.org/GNOME/glib/-/merge_requests/2214
-	  https://gitlab.gnome.org/GNOME/glib-networking/-/issues/179
-	  https://gitlab.gnome.org/GNOME/glib-networking/-/merge_requests/193
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2494>
-
-2022-07-12 16:58:00 +0800  Bruce Liang <Bruce.Liang@Abilitycorp.com.tw>
-
-	* gst/rtsp-server/rtsp-client.c:
-	  rtsp-client: Fix url for generating key in media factory
-	  The mount point at / can be accessed by both the URL forms rtsp://<IP>:<PORT> and rtsp://<IP>:<PORT>/.
-	  To make media factory generating the same key for both the URL forms, the url sent to gst_rtsp_media_factory_construct() needs to be normalized first.
-	  This commit creates a new GstRTSPUrl as the normalized url to send to gst_rtsp_media_factory_construct().
-	  Fixes:https://gitlab.freedesktop.org/gstreamer/gstreamer/-/issues/1297
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2681>
-
-2022-06-29 10:55:13 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* meson.build:
-	  coding style: allow declarations after statement
-	  See https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1243/
-	  and https://gitlab.freedesktop.org/gstreamer/gstreamer-project/-/issues/78
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2683>
-
-2022-06-14 16:18:35 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/meson.build:
-	* docs/plugins/gst_plugins_cache.json:
-	* docs/plugins/index.md:
-	* docs/plugins/sitemap.txt:
-	  docs: make sure rtspclientsink plugin docs index page is called index.html
-	  .. instead of plugin-index.html.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2592>
-
-2022-04-06 12:56:30 +0100  Tim-Philipp Müller <tim@centricular.com>
-
-	* meson.build:
-	  Bump GLib requirement to >= 2.62
-	  Can't require 2.64 yet because of
-	  https://gitlab.freedesktop.org/gstreamer/cerbero/-/issues/323
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2568>
-
-2022-05-16 18:06:16 +0200  Patricia Muscalu <patricia@axis.com>
-
-	* gst/rtsp-server/rtsp-media.c:
-	  rtsp-media: Correct logic on GstRTSPStreamBlocking message reception
-	  We must take into account the receiving streams as well when calculating
-	  the expected number of the received GstRTSPStreamBlocking messages.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2429>
-
-2022-04-27 01:13:11 +0200  Mathieu Duponchelle <mathieu@centricular.com>
-
-	* tests/check/gst/onvif.c:
-	  tests/onvif: improve robustness
-	  The previous iteration of the code was inferring the type of the
-	  frame by looking at the overall size of the gst-payloaded packet.
-	  It is more robust to actually parse the payload and look at the
-	  actual data buffers it contains.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2303>
-
-2022-04-27 01:10:46 +0200  Mathieu Duponchelle <mathieu@centricular.com>
-
-	* tests/check/gst/onvif.c:
-	  tests/onvif: don't push buffers outside segment
-	  segment->stop is exclusive, so in reverse playback mode we do not
-	  need to output a buffer at that position as it will simply get
-	  clipped in basesink.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2303>
-
-2022-02-15 13:39:43 +0000  Pierre Bourré <pierre.moltess@gmail.com>
-
-	* gst/rtsp-sink/gstrtspclientsink.c:
-	  rtspclientsink: fix possible shutdown deadlock collect_streams()
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1696>
-
-2022-04-07 19:14:27 +0300  Sebastian Dröge <sebastian@centricular.com>
-
-	* gst/rtsp-server/rtsp-sdp.c:
-	  rtsp-server: Add RFC5576 Source-specific media attribute to the SDP media for signalling the CNAME
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2132>
-
-2022-04-13 14:34:57 +0200  Marc Leeman <m.leeman@televic.com>
-
-	* gst/rtsp-server/rtsp-stream.c:
-	  gst-rtsp-server: minor spelling fixes
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2170>
-
-2022-03-25 15:00:20 -0400  Xavier Claessens <xavier.claessens@collabora.com>
-
-	* examples/meson.build:
-	* meson.build:
-	  Remove glib and gobject dependencies everywhere
-	  They are part of gst_dep already and we have to make sure to always have
-	  gst_dep. The order in dependencies matters, because it is also the order
-	  in which Meson will set -I args. We want gstreamer's config.h to take
-	  precedence over glib's private config.h when it's a subproject.
-	  While at it, remove useless fallback args for gmodule/gio dependencies,
-	  only gstreamer core needs it.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2031>
-
-2022-03-28 21:03:16 +1100  Matthew Waters <matthew@centricular.com>
-
-	* gst/rtsp-server/rtsp-stream.c:
-	  rtsp-stream: remove unused variable:
-	  Fixes:
-	  ../gst/rtsp-server/rtsp-stream.c:2670:9: error: variable 'n_messages' set but not used [-Werror,-Wunused-but-set-variable]
-	  guint n_messages = 0;
-	  ^
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/2046>
-
-2022-03-18 13:42:27 +0530  Nirbheek Chauhan <nirbheek@centricular.com>
-
-	* meson.build:
-	  meson: Bump all meson requirements to 0.60
-	  Lots of new warnings ever since
-	  https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1934
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1977>
-
-2022-02-23 17:39:18 +0100  Vivienne Watermeier <vwatermeier@igalia.com>
-
+	* gst/rtsp-server/rtsp-thread-pool.c:
 	* gst/rtsp-server/rtsp-token.c:
-	  documentation: improve misleading wording
-	  The documentation for several gst_*_writable_structure functions stated
-	  that they would never return NULL, without making clear that the passed
-	  object is required to be writable. This changes the wording in those
-	  cases to make that requirement more clear.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1784>
+	* meson.build:
+	  rtsp-server: drop use of GSlice allocator
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3784>
 
-2022-02-10 08:01:02 +0100  Branko Subasic <branko@axis.com>
+2023-01-23 23:04:53 +0000  Tim-Philipp Müller <tim@centricular.com>
 
-	* examples/test-onvif-server.c:
-	* tests/check/gst/onvif.c:
-	  rtponviftimestamp: add support for using reference timestamps
-	  Make it posible to configure the element to obtain the timestamps from
-	  reference timestamp meta data instead of using the ntp-offset property,
-	  or estimating its own offset. Currently the only time format supported
-	  is "timestamp/x-unix", i.e. UTC time expressed in the unix time epoch.
-	  In addition the custom event GstNtpOffset has been renamed to
-	  GstOnvifTimestamp, to reflect that it is not necessarily used to convey
-	  the ntp-offset. As a consequence we had to modify a couple of files in
-	  the rtsp-server as well.
-	  Fixes #984
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1683>
-
-2022-02-18 16:05:53 +0100  Branko Subasic <branko@axis.com>
-
-	* tests/check/gst/onvif.c:
-	* tests/check/gst/rtspserver.c:
-	* tests/check/gst/stream.c:
-	  gst-rtsp-server: Plug a few memory leaks in tests
-	  Found and fixed a few memory leaks in the gst_rtspserver, gst_onvif and
-	  gst_stream tests by running the tests in valgrind.
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1742>
-
-2022-03-07 09:14:46 +0100  Branko Subasic <branko@axis.com>
-
-	* gst/rtsp-server/rtsp-client.c:
-	  gst-rtsp-server: fix race in rtsp-client
-	  When tunneling over HTTP, if connection on the second channel happens
-	  before the control timer is created we may trigger an assert in
-	  rtsp_ctrl_timeout_remove(). Avoid that by taking the priv->lock before
-	  attaching the client thread to the context.
-	  Fixes #1025
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1867>
-
-2022-02-04 11:15:47 +0000  Tim-Philipp Müller <tim@centricular.com>
-
-	* docs/gst_plugins_cache.json:
+	* docs/plugins/gst_plugins_cache.json:
 	* meson.build:
 	  Back to development
-	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/1635>
+	  Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/3775>
 
-=== release 1.20.0 ===
+=== release 1.22.0 ===
 
